@@ -22,7 +22,6 @@ const UserSchema = new mongoose.Schema(
       required: [true, "email required"],
       unique: true,
       lowercase: true,
-      validate: [validator.isEmail, "Please provide a valid email"],
     },
     phone: {
       type: String,
@@ -31,8 +30,11 @@ const UserSchema = new mongoose.Schema(
       unique: true,
     },
     imgProfile: {
-      type: String,
-      default: "default.jpg",
+      type: Object,
+      default: {
+        url: "https://www.w3schools.com/w3images/avatar2.png",
+        id: null,
+      },
     },
     password: {
       type: String,
@@ -43,8 +45,8 @@ const UserSchema = new mongoose.Schema(
     passwordChangedAt: Date,
     role: {
       type: String,
-      enum: ["USER", "ADMIN"],
-      default: "USER",
+      enum: ["livreur", "client", "manager"],
+      default: "client",
     },
   },
   {
