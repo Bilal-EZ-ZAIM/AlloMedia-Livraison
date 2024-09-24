@@ -22,7 +22,7 @@ const regester = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      message: "An error occurred during registration.",
+      message: "An error occurred during registration",
       error: error.message || "Internal server error",
     });
   }
