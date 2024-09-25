@@ -1,3 +1,4 @@
+const { string } = require("joi");
 const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema(
@@ -47,6 +48,15 @@ const UserSchema = new mongoose.Schema(
       type: String,
       enum: ["livreur", "client", "manager"],
       default: "client",
+    },
+    // tokenValidet: {
+    //   token: { type: String, required: true },
+    //   expirationTime: { type: Date, required: true },
+    //   secret: { type: String, required: true },
+    // },
+    isVirefier: {
+      type: Boolean,
+      default: false,
     },
   },
   {
