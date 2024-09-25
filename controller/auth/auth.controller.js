@@ -4,6 +4,7 @@ const HashPassword = require("../../util/HashPassword");
 const slug = require("slug");
 const envoyerEmail = require("../../util/mail");
 const jwt = require("jsonwebtoken");
+const bcryptjs = require("bcryptjs");
 
 const regester = async (req, res) => {
   const data = req.body;
@@ -103,6 +104,40 @@ const verifierAccount = async (req, res) => {
   }
 };
 
+const Login = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Email Or Password not correct.",
+      });
+    }
+
+    const verifyPassword = await bcryptjs.compare(
+      req.body.password,
+      user.password
+    );
+
+    if (!verifyPassword) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Email Or Password not correct.",
+      });
+    }
+
+    // const token = CreateToken(user._id);
+
+    return res.status(201).json({
+      data: user,
+      // token,
+    });
+  } catch (error) {
+    return res.status(404).json({ error });
+  }
+};
+
 const getUserById = async (req, res) => {
   const id = req.params.id;
   console.log(id);
@@ -137,4 +172,5 @@ module.exports = {
   getUserById,
   verifierAccount,
   sendMail,
+  Login,
 };
