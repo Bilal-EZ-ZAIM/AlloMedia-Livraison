@@ -127,11 +127,11 @@ const Login = async (req, res) => {
       });
     }
 
-    // const token = CreateToken(user._id);
+    const token = CreateToken(user._id);
 
     return res.status(201).json({
       data: user,
-      // token,
+      token,
     });
   } catch (error) {
     return res.status(404).json({ error });
