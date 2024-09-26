@@ -19,4 +19,7 @@ router.get("/getUserById/:id", getUserById);
 router.post("/register", ValiditeCreat, regester);
 router.post("/login", ValiditeLogin, login);
 router.post("/", sendMail);
+
+router.post("/resetpassword/:token", ValiditeCreat, regester);
+router.post("/forgetpassword ", ValiditeLogin, login);
 module.exports = router;
