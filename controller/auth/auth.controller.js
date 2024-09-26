@@ -22,7 +22,7 @@ const regester = async (req, res) => {
 
     const user = await User.create(data);
 
-    const token = CreateToken({ id: user.id }, "5m");
+    const token = CreateToken({ id: user._id }, "5m");
 
     const confirmationLink =
       "http://localhost:8001/api/auth/verifyAcount/" + token;
