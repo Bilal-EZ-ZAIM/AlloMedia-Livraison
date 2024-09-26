@@ -76,3 +76,5 @@ describe("POST /api/auth/register", () => {
     expect(response.body.message).toBe("An error occurred during registration");
   });
 });
+
+//test
