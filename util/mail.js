@@ -28,8 +28,6 @@ const envoyerEmail = async (email, subject, confirmationLink = null, code = null
 
     let message = htmlTemplate;
 
-    console.log(message);
-
     if (confirmationLink) {
       message = htmlTemplate.replace("{{confirmationLink}}", confirmationLink);
     }
