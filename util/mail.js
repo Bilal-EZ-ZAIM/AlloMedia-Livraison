@@ -14,6 +14,9 @@ const envoyerEmail = async (email, subject, confirmationLink = null, code = null
   try {
     let htmlTemplate;
 
+    console.log(type);
+    
+
     if (type === "OTP") {
       htmlTemplate = fs.readFileSync(
         path.join(__dirname, "public", "confirmationEmail.html"),
