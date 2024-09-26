@@ -4,6 +4,8 @@ const HashPassword = require("../../util/HashPassword");
 const slug = require("slug");
 const envoyerEmail = require("../../util/mail");
 const jwt = require("jsonwebtoken");
+const bcryptjs = require("bcryptjs");
+const { generateRandomCode } = require("../../util/generateRandomCode");
 
 const regester = async (req, res) => {
   const data = req.body;
@@ -20,12 +22,12 @@ const regester = async (req, res) => {
 
     const user = await User.create(data);
 
-    const token = CreateToken(user._id, "5m");
+    const token = CreateToken({ id: user.id }, "5m");
 
     const confirmationLink =
       "http://localhost:8001/api/auth/verifyAcount/" + token;
 
-    await envoyerEmail(user.email, "verfei accoute", confirmationLink);
+    await envoyerEmail(user.email, "verfei accoute", confirmationLink, "OTP");
 
     return res.status(201).json({
       message: "User created successfully!",
@@ -102,6 +104,50 @@ const verifierAccount = async (req, res) => {
   }
 };
 
+const Login = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Email Or Password not correct.",
+      });
+    }
+
+    const verifyPassword = await bcryptjs.compare(
+      req.body.password,
+      user.password
+    );
+
+    if (!verifyPassword) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Email Or Password not correct.",
+      });
+    }
+
+    const code = generateRandomCode();
+
+    const token = CreateToken({ id: user.id, code }, "5m");
+
+    await envoyerEmail(
+      user.email,
+      "verfei accoute par code",
+      (confirmationLink = null),
+      code,
+      "2FA"
+    );
+
+    return res.status(201).json({
+      data: user,
+      token,
+    });
+  } catch (error) {
+    return res.status(404).json({ error });
+  }
+};
+
 const getUserById = async (req, res) => {
   const id = req.params.id;
   console.log(id);
@@ -136,4 +182,5 @@ module.exports = {
   getUserById,
   verifierAccount,
   sendMail,
+  Login,
 };

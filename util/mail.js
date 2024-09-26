@@ -10,19 +10,32 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const envoyerEmail = async (email, subject, confirmationLink = null) => {
+const envoyerEmail = async (email, subject, confirmationLink = null, code = null , type) => {
   try {
+    let htmlTemplate;
 
-    const htmlTemplate = fs.readFileSync(
-      path.join(__dirname, "public", "confirmationEmail.html"),
-      "utf8"
-    );
+    if (type === "OTP") {
+      htmlTemplate = fs.readFileSync(
+        path.join(__dirname, "public", "confirmationEmail.html"),
+        "utf8"
+      );
+    } else {
+      htmlTemplate = fs.readFileSync(
+        path.join(__dirname, "public", "code2FA.html"),
+        "utf8"
+      );
+    }
 
     let message = htmlTemplate;
-    
+
     if (confirmationLink) {
       message = htmlTemplate.replace("{{confirmationLink}}", confirmationLink);
     }
+
+    if (code) {
+      message = htmlTemplate.replace(" {{code2FA}}", code);
+    }
+
 
     const info = await transporter.sendMail({
       from: "bbilalzaimrajawi@gmail.com",
