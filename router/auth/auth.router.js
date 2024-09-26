@@ -6,7 +6,7 @@ const {
   verifierAccount,
   sendMail,
   verifier2FA,
-  Login,
+  login,
 } = require("../../controller/auth/auth.controller");
 const {
   ValiditeCreat,
@@ -17,6 +17,6 @@ router.get("/verifyAcount/:token", verifierAccount);
 router.post("/verify-otp/:token", verifier2FA);
 router.get("/getUserById/:id", getUserById);
 router.post("/register", ValiditeCreat, regester);
-router.post("/login", ValiditeLogin, Login);
+router.post("/login", ValiditeLogin, login);
 router.post("/", sendMail);
 module.exports = router;

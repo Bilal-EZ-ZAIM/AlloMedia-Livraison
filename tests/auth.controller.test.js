@@ -1,7 +1,7 @@
 const request = require("supertest");
 const express = require("express");
 const app = express();
-const { regester  } = require("../controller/auth/auth.controller");
+const { regester} = require("../controller/auth/auth.controller");
 const User = require("../model/user.model");
 
 jest.mock("../model/user.model");
@@ -20,7 +20,6 @@ describe("POST /api/auth/register", () => {
   });
 
   it("should process req.body and create a new user", async () => {
-   
     const userData = {
       name: "bilanox",
       email: "aurabilanox@gmail.com",
