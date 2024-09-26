@@ -33,7 +33,7 @@ const regester = async (req, res) => {
       token,
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(400).json({
       message: "An error occurred during registration",
       error: error.message || "Internal server error",
     });
@@ -53,7 +53,6 @@ const verifierAccount = async (req, res) => {
 
     const decodeToken = jwt.verify(token, process.env.JWT_SCREPT_KEY);
 
-    console.log(decodeToken);
 
     if (!decodeToken) {
       return res.status(401).json({
