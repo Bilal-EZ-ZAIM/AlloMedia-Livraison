@@ -5,6 +5,7 @@ const slug = require("slug");
 const envoyerEmail = require("../../util/mail");
 const jwt = require("jsonwebtoken");
 const bcryptjs = require("bcryptjs");
+const { generateRandomCode } = require("../../util/generateRandomCode");
 
 const regester = async (req, res) => {
   const data = req.body;
@@ -21,12 +22,12 @@ const regester = async (req, res) => {
 
     const user = await User.create(data);
 
-    const token = CreateToken(user._id, "5m");
+    const token = CreateToken({ id: user.id }, "5m");
 
     const confirmationLink =
       "http://localhost:8001/api/auth/verifyAcount/" + token;
 
-    await envoyerEmail(user.email, "verfei accoute", confirmationLink);
+    await envoyerEmail(user.email, "verfei accoute", confirmationLink, "OTP");
 
     return res.status(201).json({
       message: "User created successfully!",
@@ -127,7 +128,17 @@ const Login = async (req, res) => {
       });
     }
 
-    const token = CreateToken(user._id);
+    const code = generateRandomCode();
+
+    const token = CreateToken({ id: user.id, code }, "5m");
+
+    await envoyerEmail(
+      user.email,
+      "verfei accoute par code",
+      (confirmationLink = null),
+      code,
+      "2FA"
+    );
 
     return res.status(201).json({
       data: user,
