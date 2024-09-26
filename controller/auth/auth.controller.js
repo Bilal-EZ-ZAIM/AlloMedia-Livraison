@@ -109,7 +109,7 @@ const verifierAccount = async (req, res) => {
   }
 };
 
-const Login = async (req, res) => {
+const login = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
 
@@ -265,6 +265,6 @@ module.exports = {
   getUserById,
   verifierAccount,
   sendMail,
-  Login,
+  login,
   verifier2FA,
 };

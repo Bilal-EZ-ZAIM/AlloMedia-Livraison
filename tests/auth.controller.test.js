@@ -1,12 +1,12 @@
 const request = require("supertest");
 const express = require("express");
 const app = express();
-const { regester } = require("../controller/auth/auth.controller"); 
+const { regester, login } = require("../controller/auth/auth.controller");
 const User = require("../model/user.model");
 const HashPassword = require("../util/HashPassword");
 const CreateToken = require("../util/createToken");
-const envoyerEmail = require("../util/mail"); 
-const slug = require("slug"); 
+const envoyerEmail = require("../util/mail");
+const slug = require("slug");
 
 jest.mock("../model/user.model");
 jest.mock("../util/HashPassword");
@@ -19,10 +19,10 @@ app.post("/api/auth/register", regester);
 
 describe("POST /api/auth/register", () => {
   beforeEach(() => {
-    jest.clearAllMocks(); 
+    jest.clearAllMocks();
   });
 
-  it("should process req.body and create a new user with a token", async () => {
+  it("should process req.body and create a new user", async () => {
     const userData = {
       name: "John Doe",
       email: "john.doe@example.com",
@@ -44,7 +44,7 @@ describe("POST /api/auth/register", () => {
 
     CreateToken.mockReturnValue("mocked_token");
 
-    envoyerEmail.mockResolvedValue(true); 
+    envoyerEmail.mockResolvedValue(true);
 
     const response = await request(app)
       .post("/api/auth/register")
@@ -93,5 +93,111 @@ describe("POST /api/auth/register", () => {
 
     expect(response.body.message).toBe("An error occurred during registration");
     expect(response.body.error).toBe("Database error");
+  });
+});
+
+const bcryptjs = require("bcryptjs");
+const { generateRandomCode } = require("../util/generateRandomCode");
+
+jest.mock("bcryptjs");
+jest.mock("../util/generateRandomCode");
+
+describe("POST /api/auth/login", () => {
+  let req, res;
+
+  beforeEach(() => {
+    req = {
+      body: {
+        email: "test@example.com",
+        password: "password123",
+      },
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    User.findOne.mockClear();
+    bcryptjs.compare.mockClear();
+    CreateToken.mockClear();
+    envoyerEmail.mockClear();
+    generateRandomCode.mockClear();
+  });
+
+  it("should return 404 if user is not found", async () => {
+    // Simule que l'utilisateur n'existe pas
+    User.findOne.mockResolvedValue(null);
+
+    await login(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({
+      status: "fail",
+      message: "Email Or Password not correct.",
+    });
+  });
+
+  it("should return 404 if password is incorrect", async () => {
+    // Simule que l'utilisateur est trouvé
+    User.findOne.mockResolvedValue({
+      email: "test@example.com",
+      password: "hashed_password",
+    });
+
+    // Simule que la comparaison du mot de passe échoue
+    bcryptjs.compare.mockResolvedValue(false);
+
+    await login(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({
+      status: "fail",
+      message: "Email Or Password not correct.",
+    });
+  });
+
+  it("should generate token and send email if login is successful", async () => {
+    const user = {
+      id: "user_id",
+      email: "test@example.com",
+      password: "hashed_password",
+    };
+
+    // Simule que l'utilisateur est trouvé
+    User.findOne.mockResolvedValue(user);
+
+    // Simule que la comparaison du mot de passe réussit
+    bcryptjs.compare.mockResolvedValue(true);
+
+    // Simule la génération du code 2FA
+    generateRandomCode.mockReturnValue("123456");
+
+    // Simule la génération du token
+    CreateToken.mockReturnValue("mocked_token");
+
+    await login(req, res);
+
+    // Vérifie si le token est généré correctement
+    expect(CreateToken).toHaveBeenCalledWith(
+      { id: "user_id", code: "123456" },
+      "5m"
+    );
+
+    // Vérifie si l'email est envoyé correctement
+    expect(envoyerEmail).toHaveBeenCalledWith(
+      "test@example.com",
+      "verfei accoute par code",
+      null, // confirmationLink
+      "123456", // code
+      "2FA"
+    );
+
+    // Vérifie si la réponse est correcte
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({
+      data: user,
+      token: "mocked_token",
+    });
   });
 });
