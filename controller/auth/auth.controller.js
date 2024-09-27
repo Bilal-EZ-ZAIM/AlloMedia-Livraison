@@ -153,6 +153,46 @@ const login = async (req, res) => {
   }
 };
 
+const forgetpassword = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+
+    // Check if the email exists in the system
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Email is not correct.",
+      });
+    }
+
+    // Generate a random code
+    const code = generateRandomCode();
+
+    // Create a token valid for 5 minutes
+    const token = CreateToken({ id: user.id, code }, "5m");
+
+    // Send email with the 2FA code
+    await envoyerEmail(
+      user.email,
+      "forgetpassword",
+      (confirmationLink = null),
+      code,
+      "forgetpassword"
+    );
+
+    return res.status(201).json({
+      message: "Code to reset password has been sent.",
+      token,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: "error",
+      message: "An error occurred. Please try again later.",
+      error,
+    });
+  }
+};
+
 const verifier2FA = async (req, res) => {
   try {
     let token = req.params.token;
@@ -233,12 +273,12 @@ const verifier2FA = async (req, res) => {
 
 const getUserById = async (req, res) => {
   const id = req.params.id;
-  console.log(id);
 
   try {
     const user = await User.findById(id);
 
     return res.status(200).json({
+      message: "get user avec success",
       user,
     });
   } catch (error) {
@@ -267,4 +307,5 @@ module.exports = {
   sendMail,
   login,
   verifier2FA,
+  forgetpassword,
 };
