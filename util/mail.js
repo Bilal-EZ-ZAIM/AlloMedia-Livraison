@@ -46,7 +46,7 @@ const envoyerEmail = async (
     }
 
     if (code) {
-      message = htmlTemplate.replace(" {{code}}", code);
+      message = htmlTemplate.replace("{{code}}", code);
     }
 
     const info = await transporter.sendMail({

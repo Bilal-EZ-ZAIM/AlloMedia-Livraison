@@ -86,6 +86,28 @@ const ValiditePassworUpdit = [
   handelParamesError,
 ];
 
+
+const ValiditePassworUpditForget = [
+  check("newPassword")
+    .notEmpty()
+    .withMessage("newPassword is required")
+    .isLength({ min: 8 })
+    .withMessage("Too Short Password"),
+  check("confirmPassword")
+    .notEmpty()
+    .withMessage("confirmPassword is required")
+    .isLength({ min: 8 })
+    .withMessage("Too Short confirmPassword")
+    .custom((value, { req }) => {
+      if (req.body.newPassword !== value) {
+        throw new Error(
+          "Confirmation password does not match the new password"
+        );
+      }
+      return true;
+    }),
+  handelParamesError,
+];
 const ValiditeLogin = [
   check("email")
     .notEmpty()
@@ -100,9 +122,20 @@ const ValiditeLogin = [
   handelParamesError,
 ];
 
+const ValiditeEmailforgetpassword = [
+  check("email")
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Forma not email"),
+  handelParamesError,
+];
+
 module.exports = {
   ValiditUserId,
   ValiditeCreat,
   ValiditePassworUpdit,
   ValiditeLogin,
+  ValiditeEmailforgetpassword,
+  ValiditePassworUpditForget
 };
