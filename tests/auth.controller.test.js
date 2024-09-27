@@ -1,7 +1,11 @@
 const request = require("supertest");
 const express = require("express");
 const app = express();
-const { regester, login } = require("../controller/auth/auth.controller");
+const {
+  regester,
+  login,
+  getUserById,
+} = require("../controller/auth/auth.controller");
 const User = require("../model/user.model");
 const HashPassword = require("../util/HashPassword");
 const CreateToken = require("../util/createToken");
@@ -16,6 +20,7 @@ jest.mock("slug");
 
 app.use(express.json());
 app.post("/api/auth/register", regester);
+app.get("/api/auth/getUserById/1", getUserById);
 
 describe("POST /api/auth/register", () => {
   beforeEach(() => {
@@ -31,7 +36,6 @@ describe("POST /api/auth/register", () => {
       phone: "123456789",
     };
 
-    // محاكاة دوال
     slug.mockReturnValue("john-doe");
     HashPassword.mockResolvedValue("hashed_password");
 
@@ -199,5 +203,47 @@ describe("POST /api/auth/login", () => {
       data: user,
       token: "mocked_token",
     });
+  });
+});
+
+// test getById
+
+describe("GET /api/auth/getUserById/", () => {
+  beforeEach(() => {
+    req = {
+      params: {
+        id: "1"
+      },
+    };
+    jest.clearAllMocks();
+  });
+
+  it("should process req.params", async () => {
+    const id = 1;
+
+    // قم بمحاكاة النجاح بدلاً من الخطأ
+    User.findById.mockResolvedValue({
+      id: "1",
+      name: "bilal",
+    });
+
+    const response = await request(app)
+      .get("/api/auth/getUserById/1")
+      .expect(200);
+
+    expect(response.body.message).toBe("get user avec success");
+    expect(response.body.user).toBeDefined(); 
+
+    expect(User.findById).toHaveBeenCalledWith(1);
+  });
+
+  it("should return an error if getUser fails", async () => {
+    User.findById.mockRejectedValue(new Error("Database error"));
+
+    const response = await request(app)
+      .get("/api/auth/getUserById/1")
+      .expect(400);
+
+    expect(response.body.error).toBe("Database error");
   });
 });

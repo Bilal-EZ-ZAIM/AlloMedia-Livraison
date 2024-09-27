@@ -10,16 +10,26 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const envoyerEmail = async (email, subject, confirmationLink = null, code = null , type) => {
+const envoyerEmail = async (
+  email,
+  subject,
+  confirmationLink = null,
+  code = null,
+  type
+) => {
   try {
     let htmlTemplate;
 
     console.log(type);
-    
 
     if (type === "OTP") {
       htmlTemplate = fs.readFileSync(
         path.join(__dirname, "public", "confirmationEmail.html"),
+        "utf8"
+      );
+    } else if (type === "forgetpassword") {
+      htmlTemplate = fs.readFileSync(
+        path.join(__dirname, "public", "forgetpassword.html"),
         "utf8"
       );
     } else {
@@ -36,9 +46,8 @@ const envoyerEmail = async (email, subject, confirmationLink = null, code = null
     }
 
     if (code) {
-      message = htmlTemplate.replace(" {{code2FA}}", code);
+      message = htmlTemplate.replace(" {{code}}", code);
     }
-
 
     const info = await transporter.sendMail({
       from: "bbilalzaimrajawi@gmail.com",
