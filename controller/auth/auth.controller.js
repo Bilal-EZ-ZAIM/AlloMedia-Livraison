@@ -195,8 +195,9 @@ const forgetpassword = async (req, res) => {
 
 const resetpassword = async (req, res) => {
   try {
-    const { newPassword } = req.body;
+    const { newPassword  } = req.body;
     // Si tout est valide, retourner une réponse de succès
+
 
     const user = req.user;
 
@@ -210,9 +211,9 @@ const resetpassword = async (req, res) => {
       userId,
       {
         password: hashedPassword,
-        passwordChangedAt: new Date(), // إضافة الوقت الحالي
+        passwordChangedAt: new Date(), 
       },
-      { new: true } // خيار لإرجاع المستند المحدث
+      { new: true } 
     );
     const token = CreateToken({ id: user.id });
     res.status(200).json({
@@ -245,6 +246,74 @@ const resetpassword = async (req, res) => {
   }
 };
 
+const updatedpassword = async (req, res) => {
+  try {
+    const { newPassword , password  } = req.body;
+    // Si tout est valide, retourner une réponse de succès
+
+
+    const user = req.user;
+
+    console.log(user);
+    
+
+    const verifyPassword = await bcryptjs.compare(
+      password,
+      user.password
+    );
+
+    console.log(  "V" +verifyPassword);
+    
+
+    if (!verifyPassword) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Password not correct.",
+      });
+    }
+
+    const hashedPassword = await HashPassword(newPassword);
+    
+
+    const userId = req.user._id; 
+    await User.findByIdAndUpdate(
+      userId,
+      {
+        password: hashedPassword,
+        passwordChangedAt: new Date(), 
+      },
+      { new: true } 
+    );
+    const token = CreateToken({ id: user.id });
+    res.status(200).json({
+      token,
+      user,
+      status: "success",
+      message: "Votre mot de passe a été mis à jour avec succès.",
+    });
+  } catch (error) {
+    // Gestion des erreurs spécifiques liées au token
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({
+        status: "fail",
+        message:
+          "Le temps imparti a expiré. Veuillez demander un nouveau code.",
+      });
+    }
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({
+        status: "fail",
+        message: "Token invalide. Veuillez vous reconnecter.",
+      });
+    }
+    // Gestion des erreurs générales
+    return res.status(500).json({
+      status: "error",
+      message: "Une erreur est survenue. Veuillez réessayer plus tard.",
+      error: error.message,
+    });
+  }
+};
 const verifier2FA = async (req, res) => {
   try {
     let token = req.params.token;
@@ -356,5 +425,6 @@ module.exports = {
   login,
   verifier2FA,
   forgetpassword,
+  updatedpassword,
   resetpassword,
 };
