@@ -7,11 +7,17 @@ const {
   sendMail,
   verifier2FA,
   login,
+  forgetpassword,
+  resetpassword,
 } = require("../../controller/auth/auth.controller");
 const {
   ValiditeCreat,
   ValiditeLogin,
+  ValiditeEmailforgetpassword,
+  ValiditePassworUpdit,
+  ValiditePassworUpditForget,
 } = require("../../validation/auth.validation");
+const verifyCodeToken = require("../../middleware/verfyCodeToken");
 
 router.get("/verifyAcount/:token", verifierAccount);
 router.post("/verify-otp/:token", verifier2FA);
@@ -20,6 +26,11 @@ router.post("/register", ValiditeCreat, regester);
 router.post("/login", ValiditeLogin, login);
 router.post("/", sendMail);
 
-router.post("/resetpassword/:token", ValiditeCreat, regester);
-router.post("/forgetpassword ", ValiditeLogin, login);
+router.post(
+  "/resetpassword/:token",
+  ValiditePassworUpditForget,
+  verifyCodeToken,
+  resetpassword
+);
+router.post("/forgetpassword", ValiditeEmailforgetpassword, forgetpassword);
 module.exports = router;

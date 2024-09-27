@@ -193,6 +193,58 @@ const forgetpassword = async (req, res) => {
   }
 };
 
+const resetpassword = async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+    // Si tout est valide, retourner une réponse de succès
+
+    const user = req.user;
+
+    const hashedPassword = await HashPassword(newPassword);
+
+    console.log(hashedPassword);
+    
+
+    const userId = req.user._id; 
+    await User.findByIdAndUpdate(
+      userId,
+      {
+        password: hashedPassword,
+        passwordChangedAt: new Date(), // إضافة الوقت الحالي
+      },
+      { new: true } // خيار لإرجاع المستند المحدث
+    );
+    const token = CreateToken({ id: user.id });
+    res.status(200).json({
+      token,
+      user,
+      status: "success",
+      message: "Votre mot de passe a été mis à jour avec succès.",
+    });
+  } catch (error) {
+    // Gestion des erreurs spécifiques liées au token
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({
+        status: "fail",
+        message:
+          "Le temps imparti a expiré. Veuillez demander un nouveau code.",
+      });
+    }
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({
+        status: "fail",
+        message: "Token invalide. Veuillez vous reconnecter.",
+      });
+    }
+    // Gestion des erreurs générales
+    return res.status(500).json({
+      status: "error",
+      message: "Une erreur est survenue. Veuillez réessayer plus tard.",
+      error: error.message,
+    });
+  }
+};
+
 const verifier2FA = async (req, res) => {
   try {
     let token = req.params.token;
@@ -242,10 +294,6 @@ const verifier2FA = async (req, res) => {
     res.status(200).json({
       status: "success",
       message: "Votre authentification a été effectuée avec succès.",
-      user: {
-        name: currentUser.name,
-        email: currentUser.email,
-      },
     });
   } catch (error) {
     // Gestion des erreurs spécifiques liées au token
@@ -308,4 +356,5 @@ module.exports = {
   login,
   verifier2FA,
   forgetpassword,
+  resetpassword,
 };
