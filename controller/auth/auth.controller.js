@@ -195,25 +195,23 @@ const forgetpassword = async (req, res) => {
 
 const resetpassword = async (req, res) => {
   try {
-    const { newPassword  } = req.body;
+    const { newPassword } = req.body;
     // Si tout est valide, retourner une réponse de succès
-
 
     const user = req.user;
 
     const hashedPassword = await HashPassword(newPassword);
 
     console.log(hashedPassword);
-    
 
-    const userId = req.user._id; 
+    const userId = req.user._id;
     await User.findByIdAndUpdate(
       userId,
       {
         password: hashedPassword,
-        passwordChangedAt: new Date(), 
+        passwordChangedAt: new Date(),
       },
-      { new: true } 
+      { new: true }
     );
     const token = CreateToken({ id: user.id });
     res.status(200).json({
@@ -248,22 +246,16 @@ const resetpassword = async (req, res) => {
 
 const updatedpassword = async (req, res) => {
   try {
-    const { newPassword , password  } = req.body;
+    const { newPassword, password } = req.body;
     // Si tout est valide, retourner une réponse de succès
-
 
     const user = req.user;
 
     console.log(user);
-    
 
-    const verifyPassword = await bcryptjs.compare(
-      password,
-      user.password
-    );
+    const verifyPassword = await bcryptjs.compare(password, user.password);
 
-    console.log(  "V" +verifyPassword);
-    
+    console.log("V" + verifyPassword);
 
     if (!verifyPassword) {
       return res.status(404).json({
@@ -273,16 +265,15 @@ const updatedpassword = async (req, res) => {
     }
 
     const hashedPassword = await HashPassword(newPassword);
-    
 
-    const userId = req.user._id; 
+    const userId = req.user._id;
     await User.findByIdAndUpdate(
       userId,
       {
         password: hashedPassword,
-        passwordChangedAt: new Date(), 
+        passwordChangedAt: new Date(),
       },
-      { new: true } 
+      { new: true }
     );
     const token = CreateToken({ id: user.id });
     res.status(200).json({
