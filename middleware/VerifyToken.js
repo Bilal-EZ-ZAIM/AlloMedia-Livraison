@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
-const UserModel = require("../model/UserModel");
-const ApiError = require("../util/ApiError");
+const UserModel = require("../model/user.model");
 
 const verifyToken = async (req, res, next) => {
   // 1 check Token
@@ -15,12 +14,10 @@ const verifyToken = async (req, res, next) => {
     }
 
     if (!token) {
-      return next(
-        new ApiError(
-          "You are not login , Please login to get access this route",
-          401
-        )
-      );
+      return res.status(401).json({
+        status: "fail",
+        message: "You are not login , Please login to get access this route.",
+      });
     }
 
     // console.log(decodeToken);
@@ -34,12 +31,19 @@ const verifyToken = async (req, res, next) => {
       throw "You are not login , Please login to get access this route";
     }
 
-    const currentUser = await UserModel.findById(decodeToken.id).select(['passwordChangedAt' , 'role' , 'name' , 'email']);
+    const currentUser = await UserModel.findById(decodeToken.id).select([
+      "passwordChangedAt",
+      "role",
+      "name",
+      "email",
+      "password",
+    ]);
 
     if (!currentUser) {
-      return next(
-        new ApiError("The user belonging to this token no longer exists.", 401)
-      );
+      return res.status(401).json({
+        status: "fail",
+        message: "The user belonging to this token no longer exists.",
+      });
     }
 
     if (currentUser.passwordChangedAt) {
@@ -49,12 +53,11 @@ const verifyToken = async (req, res, next) => {
       );
 
       if (passwordChangedTimestamp > decodeToken.iat) {
-        return next(
-          new ApiError(
-            "User recently changed his password please login again..",
-            401
-          )
-        );
+        return res.status(401).json({
+          status: "fail",
+          message:
+            "Your password has been recently updated. Please re-authenticate.",
+        });
       }
     }
 
@@ -63,12 +66,16 @@ const verifyToken = async (req, res, next) => {
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {
-      return next(
-        new ApiError("Your token has expired. Please log in again.", 401)
-      );
+      return res.status(401).json({
+        status: "fail",
+        message: "Your token has expired. Please log in again.",
+      });
     }
     if (error.name === "JsonWebTokenError") {
-      return next(new ApiError("Invalid token. Please log in again.", 401));
+      return res.status(401).json({
+        status: "fail",
+        message: "Invalid token. Please log in again",
+      });
     }
     return res.status(500).json({ error });
   }
