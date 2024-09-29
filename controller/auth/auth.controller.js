@@ -255,8 +255,6 @@ const updatedpassword = async (req, res) => {
 
     const verifyPassword = await bcryptjs.compare(password, user.password);
 
-    console.log("V" + verifyPassword);
-
     if (!verifyPassword) {
       return res.status(404).json({
         status: "fail",
@@ -408,6 +406,10 @@ const sendMail = async (req, res) => {
   } catch (error) {}
 };
 
+const logout = async (req, res) => {
+
+};
+
 module.exports = {
   regester,
   getUserById,
@@ -418,4 +420,5 @@ module.exports = {
   forgetpassword,
   updatedpassword,
   resetpassword,
+  logout 
 };
