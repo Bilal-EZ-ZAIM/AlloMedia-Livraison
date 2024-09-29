@@ -10,6 +10,7 @@ const {
   forgetpassword,
   resetpassword,
   updatedpassword,
+  logout,
 } = require("../../controller/auth/auth.controller");
 const {
   ValiditeCreat,
@@ -35,5 +36,12 @@ router.post(
   resetpassword
 );
 router.post("/forgetpassword", ValiditeEmailforgetpassword, forgetpassword);
-router.post("/upditPassword", verifyToken ,ValiditePassworUpdit, updatedpassword );
+router.post(
+  "/upditPassword",
+  verifyToken,
+  ValiditePassworUpdit,
+  updatedpassword
+);
+
+router.get("/logout", verifyToken, logout);
 module.exports = router;
