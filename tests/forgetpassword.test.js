@@ -1,6 +1,5 @@
 // code npx jest tests/forgetpassword.test.js
 const User = require("../model/user.model");
-const bcryptjs = require("bcryptjs");
 const { forgetpassword } = require("../controller/auth/auth.controller");
 const CreateToken = require("../util/createToken");
 const envoyerEmail = require("../util/mail");

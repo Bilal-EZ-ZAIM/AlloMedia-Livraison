@@ -356,7 +356,7 @@ const verifier2FA = async (req, res) => {
   } catch (error) {
     // Gestion des erreurs spécifiques liées au token
     if (error.name === "TokenExpiredError") {
-      return res.status(401).json({
+      return res.status(404).json({
         status: "fail",
         message:
           "Le temps imparti a expiré. Veuillez demander un nouveau code.",
