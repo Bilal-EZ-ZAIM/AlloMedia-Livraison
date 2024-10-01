@@ -356,7 +356,7 @@ const verifier2FA = async (req, res) => {
   } catch (error) {
     // Gestion des erreurs spécifiques liées au token
     if (error.name === "TokenExpiredError") {
-      return res.status(401).json({
+      return res.status(404).json({
         status: "fail",
         message:
           "Le temps imparti a expiré. Veuillez demander un nouveau code.",
@@ -407,7 +407,25 @@ const sendMail = async (req, res) => {
 };
 
 const logout = async (req, res) => {
+  try {
+    const user = req.user;
 
+    await User.findByIdAndUpdate(
+      user._id,
+      {
+        passwordChangedAt: new Date(),
+      },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      message: "Successfully logged out.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: "An error occurred while logging out. Please try again later.",
+    });
+  }
 };
 
 module.exports = {
@@ -420,5 +438,5 @@ module.exports = {
   forgetpassword,
   updatedpassword,
   resetpassword,
-  logout 
+  logout,
 };
